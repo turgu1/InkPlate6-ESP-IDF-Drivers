@@ -59,11 +59,13 @@ InkPlate6Ctrl::sd_card_setup()
 }
 
 bool
-InkPlate6Ctrl::touch_pad_setup()
+InkPlate6Ctrl::touchpad_int_setup()
 {
-  mcp.set_int_pin(MCP::TOUCH_0, MCP::CHANGE);
-  mcp.set_int_pin(MCP::TOUCH_1, MCP::CHANGE);
-  mcp.set_int_pin(MCP::TOUCH_2, MCP::CHANGE);
+  mcp.set_int_pin(MCP::TOUCH_0, MCP::RISING);
+  mcp.set_int_pin(MCP::TOUCH_1, MCP::RISING);
+  mcp.set_int_pin(MCP::TOUCH_2, MCP::RISING);
+
+  mcp.set_int_output(MCP::INTPORTB, false, false, HIGH);
 
   return true;
 }
@@ -71,6 +73,8 @@ InkPlate6Ctrl::touch_pad_setup()
 bool
 InkPlate6Ctrl::setup()
 {
+  wire.setup();
+
   // Mount and check the SD Card
   if (!sd_card_setup()) return false;
 
@@ -78,7 +82,7 @@ InkPlate6Ctrl::setup()
   if (!e_ink.setup()) return false;
 
   // Setup Touch pad
-  if (!touch_pad_setup()) return false;
+  if (!touchpad_int_setup()) return false;
 
   // Good to go
   return true;
@@ -88,6 +92,13 @@ uint8_t
 InkPlate6Ctrl::read_touchpad(uint8_t pad)
 {
   return mcp.digital_read((MCP::Pin)((pad & 3) + 10));
+}
+
+uint8_t 
+InkPlate6Ctrl::read_touchpads()
+{
+  uint16_t val = mcp.get_ports();
+  return (val >> 10) & 7;
 }
 
 double 
@@ -103,18 +114,25 @@ InkPlate6Ctrl::read_battery()
   return ((double(adc) / 4095.0) * 3.3 * 2);
 }
 
-void InkPlate6Ctrl::light_sleep()
+bool
+InkPlate6Ctrl::light_sleep(uint32_t minutes_to_sleep)
 {
   esp_err_t err;
-  if ((err = esp_sleep_enable_ext0_wakeup(GPIO_NUM_34, 1)) != ESP_OK) {
-    LOG_E("Unable to set ext0 WakeUp for Light Sleep: %d", err);
+  if ((err = esp_sleep_enable_timer_wakeup(minutes_to_sleep * 60e6)) != ESP_OK) {
+    LOG_E("Unable to program Light Sleep wait time: %d", err);
   }
-  if ((err = esp_light_sleep_start()) != ESP_OK) {
+  else if ((err = esp_sleep_enable_ext0_wakeup(GPIO_NUM_34, 1)) != ESP_OK) {
+    LOG_E("Unable to set ext0 WakeUp for Light Sleep: %d", err);
+  } 
+  else if ((err = esp_light_sleep_start()) != ESP_OK) {
     LOG_E("Unable to start Light Sleep mode: %d", err);
   }
+
+  return esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER;
 }
 
-void InkPlate6Ctrl::deep_sleep()
+void 
+InkPlate6Ctrl::deep_sleep()
 {
   esp_err_t err;
   if ((err = esp_sleep_enable_ext0_wakeup(GPIO_NUM_34, 1)) != ESP_OK) {
