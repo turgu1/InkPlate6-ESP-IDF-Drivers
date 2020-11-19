@@ -1,6 +1,6 @@
 # ESP-IDF InkPlate-6 Low Level classes
 
-This project contains in the `lib/inkplate` folder the low-level classes required to access the InkPlate-6 hardware in an ESP-IDF SDK context. This is an extract from the EPub-InkPlate project that can be looked at as an example of a extensive  application using these classes.
+This project contains in the `lib/inkplate` folder the low-level classes required to access the InkPlate-6 hardware in an ESP-IDF SDK context. This is an extract from the EPub-InkPlate project that can be looked at as an example of a extensive  application using these classes. The classes were first retrieved from the Arduino library made by e-Radionica and refactored to be inline with my own coding practices. 
 
 The driver classes are:
 
@@ -18,8 +18,6 @@ This project is a working example. You can build it using PlatformIO. It will dr
 
 An InkPlate application requires some functionalities to be properly setup within the ESP-IDF. The following elements have been done for his project and can be used as a reference for other projects:
 
-- **Flash memory partitioning**: the file `partitions.csv` contains the table of partitions required to support the application in the 4MB flash memory. The partitions OTA_0 and OTA_1 have been set to be 1.3MB in size. In the `platformio.ini` file, the line `board_build.partitions=...` is directing the use of these partitions configuration. 
-  
 - **PSRAM memory management**: The PSRAM is an extension to the ESP32 memory that offer 4MB+4MB of additional RAM. The first 4MB is readily available to integrate to the dynamic memory allocation of the ESP-IDF SDK. To do so, some parameters located in the `sdkconfig` file must be set accordingly. This must be done using the menuconfig application that is part of the ESP-IDF. The following command will launch the application (the current folder must be the main folder of EPub-InkPlate):
 
   ```
@@ -45,8 +43,11 @@ An InkPlate application requires some functionalities to be properly setup withi
 
   - Select `Component config` > `ESP32-Specific` > `CPU frequency` > `240 Mhz`
 
-- **FAT Filesystem Support**: The application requires usage of the micro SD card. This card must be formatted on a computer (Linux or Windows) with a FAT 32 partition. The following parameters must be adjusted in `sdkconfig`:
+- **FAT Filesystem Support**: If the application requires usage of the micro SD card. This card must be formatted on a computer (Linux or Windows) with a FAT 32 partition. The InlPlate6Ctrl class requires this in its current configuration. The following parameters must be adjusted in `sdkconfig`:
 
   - Select `Component config` > `FAT Filesystem support` > `Max Long filename length` > `255`
   - Select `Number of simultaneous open files protected  by lock function` > `5`
   - Select `Prefer external RAM when allocating FATFS buffer`
+
+- **Flash memory partitioning (optional)**: the file `partitions.csv` contains the table of partitions definition for the 4MB flash memory, required to support the largest applications size in a OTA context. The partitions OTA_0 and OTA_1 have been set to be 1.3MB in size. In the `platformio.ini` file, the line `board_build.partitions=...` is directing the use of these partitions configuration. 
+ 
