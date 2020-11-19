@@ -2,6 +2,8 @@
 
 This project contains in the `lib/inkplate` folder the low-level classes required to access the InkPlate-6 hardware in an ESP-IDF SDK context. This is an extract from the EPub-InkPlate project that can be looked at as an example of a extensive  application using these classes. The classes were first retrieved from the Arduino library made by e-Radionica and refactored to be inline with my own coding practices. 
 
+Beware that these classes are **not** re-entrant. That means that it is not possible to use them in a multi-thread context without proper mutual exclusion access control. 
+
 The driver classes are:
 
 - EInk: The e-ink display panel class. (Arduino Inkplate equivalent)
