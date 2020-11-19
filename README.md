@@ -10,7 +10,7 @@ The driver classes are:
 - MCP - MCP23017 16 bits IO expander class. (Arduino Mcp)
 - ESP - Some methods similar to Arduino supplied methods, but in an ESP-IDF context
 - Wire - Similar to Arduino Wire, but built using i2c functions
-- Inkplate6Ctrl - Class to control various modes of usage (like deep sleep, light sleep, sd card mounting, etc.)
+- InkPlate6Ctrl - Class to control various modes of usage (like deep sleep, light sleep, sd card mounting, etc.)
 - Logging - Some definition for log output
 - NonCopyable - Support class to sustain non-copyable singleton.
 
@@ -45,7 +45,7 @@ An InkPlate application requires some functionalities to be properly setup withi
 
   - Select `Component config` > `ESP32-Specific` > `CPU frequency` > `240 Mhz`
 
-- **FAT Filesystem Support**: If the application requires usage of the micro SD card. This card must be formatted on a computer (Linux or Windows) with a FAT 32 partition. The InlPlate6Ctrl class requires this in its current configuration. The following parameters must be adjusted in `sdkconfig`:
+- **FAT Filesystem Support**: If the application requires usage of the micro SD card. This card must be formatted on a computer (Linux or Windows) with a FAT 32 partition. The InkPlate6Ctrl class requires this in its current configuration. The following parameters must be adjusted in `sdkconfig`:
 
   - Select `Component config` > `FAT Filesystem support` > `Max Long filename length` > `255`
   - Select `Number of simultaneous open files protected  by lock function` > `5`
