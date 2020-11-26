@@ -1,11 +1,5 @@
 /*
 InkPlate6.h
-
-Modified by Guy Turcotte 
-November 12, 2020
-
-from the Arduino Library:
-
 Inkplate 6 Arduino library
 David Zovko, Borna Biro, Denis Vajak, Zvonimir Haramustek @ e-radionica.com
 September 24, 2020
