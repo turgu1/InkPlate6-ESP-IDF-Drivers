@@ -29,6 +29,8 @@ Distributed as-is; no warranty is given.
 #include "mcp.hpp"
 #include "esp.hpp"
 
+#include <iostream>
+
 EInk EInk::singleton;
 
 const uint8_t EInk::WAVEFORM_3BIT[8][8] = {
@@ -127,7 +129,7 @@ EInk::setup()
  
   //ESP_LOGD(TAG, "Power Mgr Init..."); fflush(stdout);
 
-  ESP::delay(1);
+  ESP::delay_microseconds(1800);
   wire.begin_transmission(PWRMGR_ADDRESS);
   wire.write(0x09);
   wire.write(0b00011011); // Power up seq.
@@ -202,13 +204,6 @@ EInk::update_1bit(const Bitmap1Bit & bitmap)
   turn_on();
 
   clean_fast(0,  1);
-  clean_fast(1, 21);
-  clean_fast(2,  1);
-  clean_fast(0, 12);
-  clean_fast(2,  1);
-  clean_fast(1, 21);
-  clean_fast(2,  1);
-  clean_fast(0, 12);
 
   for (int8_t k = 0; k < 4; k++) {
     ptr = &bitmap[BITMAP_SIZE_1BIT - 1];
@@ -241,7 +236,7 @@ EInk::update_1bit(const Bitmap1Bit & bitmap)
 
   ptr = &bitmap[BITMAP_SIZE_1BIT - 1];
   vscan_start();
-
+ 
   for (uint16_t i = 0; i < HEIGHT; i++) {
     dram = *ptr--;
     send = PIN_LUT[LUT2[dram >> 4]];
@@ -312,6 +307,7 @@ EInk::update_3bit(const Bitmap3Bit & bitmap)
   clean_fast(0, 12);
 
   for (int k = 0; k < 8; k++) {
+
     const uint8_t * dp = &bitmap[BITMAP_SIZE_3BIT - 1];
     uint32_t send;
     uint8_t  pix1;
@@ -437,6 +433,7 @@ EInk::partial_update(const Bitmap1Bit & bitmap)
 
   clean_fast(2, 2);
   clean_fast(3, 1);
+  
   vscan_start();
   turn_off();
 
@@ -459,7 +456,7 @@ EInk::clean()
   m++; clean_fast((WAVEFORM[m] >> 30) & 3, 10);
 }
 
-void IRAM_ATTR 
+void
 EInk::clean_fast(uint8_t c, uint8_t rep)
 {
   static uint8_t byte[4] = { 0b10101010, 0b01010101, 0b00000000, 0b11111111 };
@@ -469,10 +466,13 @@ EInk::clean_fast(uint8_t c, uint8_t rep)
   uint32_t send = PIN_LUT[byte[c]];
 
   for (int8_t k = 0; k < rep; k++) {
+
     vscan_start();
 
     for (uint16_t i = 0; i < HEIGHT; i++) {
+
       hscan_start(send);
+
       GPIO.out_w1ts = CL | send;
       GPIO.out_w1tc = CL;
 
@@ -484,6 +484,7 @@ EInk::clean_fast(uint8_t c, uint8_t rep)
       }
       GPIO.out_w1ts = CL;
       GPIO.out_w1tc = CL;
+
       vscan_end();
     }
 
@@ -524,12 +525,13 @@ EInk::turn_off()
 
 // Turn on supply for epaper display (TPS65186) 
 // [+15 VDC, -15VDC, +22VDC, -20VDC, +3.3VDC, VCOM]
-void EInk::turn_on()
+void 
+EInk::turn_on()
 {
   if (get_panel_state() == ON) return;
 
   mcp.wakeup_set();
-  ESP::delay(1);
+  ESP::delay_microseconds(1800);
   mcp.pwrup_set();
 
   // Enable all rails
@@ -567,7 +569,8 @@ void EInk::turn_on()
   set_panel_state(ON);
 }
 
-uint8_t EInk::read_power_good()
+uint8_t 
+EInk::read_power_good()
 {
   wire.begin_transmission(PWRMGR_ADDRESS);
   wire.write(0x0F);
@@ -579,7 +582,8 @@ uint8_t EInk::read_power_good()
 
 // LOW LEVEL FUNCTIONS
 
-void EInk::vscan_start()
+void 
+EInk::vscan_start()
 {
         ckv_set(); ESP::delay_microseconds( 7);
   mcp.spv_clear(); ESP::delay_microseconds(10);
@@ -594,7 +598,8 @@ void EInk::vscan_start()
         ckv_set();
 }
 
-void EInk::hscan_start(uint32_t d)
+void 
+EInk::hscan_start(uint32_t d)
 {
   sph_clear();
   GPIO.out_w1ts = CL | d   ;
@@ -603,7 +608,8 @@ void EInk::hscan_start(uint32_t d)
   ckv_set();
 }
 
-void EInk::vscan_end()
+void 
+EInk::vscan_end()
 {
   ckv_clear();
      le_set();
@@ -612,7 +618,8 @@ void EInk::vscan_end()
   ESP::delay_microseconds(0);
 }
 
-void EInk::pins_z_state()
+void 
+EInk::pins_z_state()
 {
   gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_INPUT);
   gpio_set_direction(GPIO_NUM_2,  GPIO_MODE_INPUT);
@@ -633,7 +640,8 @@ void EInk::pins_z_state()
   gpio_set_direction(GPIO_NUM_27, GPIO_MODE_INPUT);
 }
 
-void EInk::pins_as_outputs()
+void 
+EInk::pins_as_outputs()
 {
   gpio_set_direction(GPIO_NUM_0,  GPIO_MODE_OUTPUT);
   gpio_set_direction(GPIO_NUM_2,  GPIO_MODE_OUTPUT);
@@ -661,6 +669,7 @@ EInk::read_temperature()
     
   if (get_panel_state() == OFF) {
     mcp.wakeup_set();
+    ESP::delay_microseconds(1800);
      mcp.pwrup_set();
 
     ESP::delay(5);
