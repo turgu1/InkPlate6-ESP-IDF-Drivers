@@ -1,5 +1,7 @@
 # ESP-IDF InkPlate-6 Low-Level classes
 
+PLEASE NOTE THAT THERE IS NO LONGER ANY UPDATE DONE TO THIS PROJECT. PLEASE LOOK AT THE ESP-IDF-INKPLATE PROJECT INSTEAD.
+
 This project contains, in the `lib/inkplate` folder, the low-level classes required to access the InkPlate-6 hardware in an ESP-IDF SDK context. This is an extract from the EPub-InkPlate project that I'm currently developing. You can look at it as an example of an extensive application using all these classes. The classes were first retrieved from the Arduino library made by e-Radionica and refactored to be inline with my coding practices. They have not been packaged as a component (in the ESP-IDF context) as they are being used in a PlatformIO application (they could be easily transformed as such, adding the appropriate CMakeLists.txt). 
 
 Beware that these classes are **not** re-entrant. That means that it is not possible to use them in a multi-thread context without proper mutual exclusion access control. 
